@@ -1,0 +1,59 @@
+<div tablefixed="1">
+    <table class="table table-striped table-bordered table-hover table-condensed"
+        ng-show="!ctrl.loading && ctrl.data.length">
+        <thead class="header">
+            <tr>
+                <th>Fecha</th>
+                <th>DAM</th>
+                <th>Tarjeta</th>
+                <th>Dispositivo</th>
+                <th ng-repeat="param in ctrl.parameters">
+                    {{param.name}} {{param.unit}}
+                    <span
+                        ng-if="param.code_type!='-1'"
+                        trigger="click"
+                        tooltip-placement="bottom"
+                        tooltip-html-unsafe="{{param.code_info}}"
+                        class="pull-right">
+                        <i class="fa fa-info-circle"></i>
+                    </span>
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="animate-repeat-fade-in" ng-repeat="row in ctrl.data | startFrom:ctrl.currentPage*ctrl.perPage | limitTo:ctrl.perPage">
+                <td class="nowrap">{{::row.date | momentDateTime:ctrl.plant.time_zone}}</td>
+                <td class="nowrap">
+                    <span tooltip="{{::row.dam_tooltip}}">{{::row.datalogger}}</span>
+
+                </td>
+                <td class="nowrap">
+                    <span tooltip="{{::row.card_tooltip}}">{{::row.card}}</span>
+                </td>
+                <td class="nowrap">{{row.device}}</td>
+                <td class="result nowrap" ng-repeat="value in row.parameters track by $index">
+                    <span ng-if="ctrl.parameters[$index].special_format_mode==SpecialFormat.NONE">
+                        {{ ::value | gpmNumber:ctrl.parameters[$index].decimal_places }}
+                    </span>
+                    <span ng-if="ctrl.parameters[$index].special_format_mode!=SpecialFormat.NONE">
+                        {{ ::value | gpmSpecialFormat:ctrl.parameters[$index].special_format_mode }}
+                    </span>
+                    <span ng-bind-html="value | decodeValue:ctrl.parameters[$index].code_type:ctrl.parameters[$index].code">
+                    </span>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<br>
+<br>
+
+<gpm-table-footer
+    per-page="ctrl.perPage"
+    per-page-options="ctrl.perPageOptions"
+    current-page="ctrl.currentPage"
+    max-pages="ctrl.maxPages"
+    on-per-page-changed="ctrl.resetPage()"
+    total-results="ctrl.data.length">
+<gpm-table-footer>
